@@ -1,0 +1,1 @@
+This app works by going to a site, extracting and identifying the links on the site and storing those links. It can also d this recursively.
