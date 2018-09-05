@@ -1,5 +1,8 @@
 import requests
 import bs4
+import os
+import csv
+
 
 def print_greeting():
     print("---------------------------------------")
@@ -7,8 +10,6 @@ def print_greeting():
     print("---------------------------------------")
 
 
-
-#Visit Site
 def parse_html(url):
     response = requests.get(url)
     html_content = response.text
@@ -17,39 +18,56 @@ def parse_html(url):
 
     return soup
 
-#Parse HTML
+
 def extract_a_tags(soup):
-    links = soup.find_all('a')
-
-    return links['href']
-
-def extract_link_tags(soup):
-    links = soup.find_all('link')
+    links = soup.find_all(href=True)
 
     return links
 
 
-# soup = bs4.BeautifulSoup(html_content, 'lxml')
+def extract_links(soup):
+    links = soup.find_all('link')
 
-#Extract Links
+    link_list = [link['href'] for link in links]
 
-#Store Links
+    return link_list
+
+def get_links():
+    #check link isn't already stored
+
+    file = os.path.abspath("url_list.csv")
+
+    url = []
+    visit = []
+
+    with open(file, 'r') as my_file:
+        reader = csv.DictReader(my_file)
+        for line in reader:
+            url.append(line['url'])
+            visit.append(line['visit'])
+
+    my_dict = {"url":url, "visit":visit}
+
+    return my_dict
+
+
+
 
 def main():
     print_greeting()
 
+    #Visit site
+
     myurl = 'http://justinstrate.com'
 
-    mysoup = parse_html(myurl)
+    #Parse HTML
+    #mysoup = parse_html(myurl)
 
-    links = extract_a_tags(mysoup)
+    #links = extract_links(mysoup)
 
-    #links = extract_link_tags(mysoup)
+    stored_links = get_links()
 
-    print(links)
-    print(type(links))
-
-
+    print(stored_links)
 
 
 
