@@ -1,36 +1,15 @@
-import requests
-import bs4
 import os
 import csv
+import collections
+import siteparse as sp
 
+
+Website = collections.namedtuple("Website", "url, visit")
 
 def print_greeting():
     print("---------------------------------------")
     print("Hello From Main")
     print("---------------------------------------")
-
-
-def parse_html(url):
-    response = requests.get(url)
-    html_content = response.text
-
-    soup = bs4.BeautifulSoup(html_content, 'html.parser')
-
-    return soup
-
-
-def extract_a_tags(soup):
-    links = soup.find_all(href=True)
-
-    return links
-
-
-def extract_links(soup):
-    links = soup.find_all('link')
-
-    link_list = [link['href'] for link in links]
-
-    return link_list
 
 def get_links():
     #check link isn't already stored
@@ -50,27 +29,43 @@ def get_links():
 
     return my_dict
 
+def store_links(links):
+    file = os.path.abspath("url_list.csv")
 
+
+    with open(r'url_list.csv', 'a', newline='') as csvfile:
+        for link in links:
+            fieldnames = ['url', 'visit']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writerow({'url': link, 'visit': 'no'})
 
 
 def main():
     print_greeting()
 
-    #Visit site
-
-    myurl = 'http://justinstrate.com'
-
-    #Parse HTML
-    #mysoup = parse_html(myurl)
-
-    #links = extract_links(mysoup)
-
     stored_links = get_links()
 
-    print(stored_links)
+    sites = list(zip(stored_links["url"], stored_links["visit"]))
 
+    websites = [Website(url=u[0], visit=u[1]) for u in sites]
 
+    counter = 1
+    max_count = 200
 
+    for website in websites:
+        if website.visit == "no":
+            mysoup = sp.parse_html(website.url)
+            links = sp.extract_links(mysoup)
+
+            links2store = [_ for _ in links if _ not in stored_links["url"]]
+
+            store_links(links2store)
+
+            counter += 1
+
+            if counter > max_count:
+                break
+        print(stored_links)
 
 
 
