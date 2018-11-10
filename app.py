@@ -40,6 +40,28 @@ def store_links(links):
             writer.writerow({'url': link, 'visit': 'no'})
 
 
+def main_loop(websites):
+    counter = 1
+    max_count = 200
+
+    stored_links = [site.url for site in websites]
+
+    for website in websites:
+        if website.visit == "no":
+            mysoup = sp.parse_html(website.url)
+            links = sp.extract_links(mysoup)
+
+            links2store = [_ for _ in links if _ not in stored_links]
+
+            store_links(links2store)
+
+            counter += 1
+
+            if counter > max_count:
+                break
+
+
+
 def main():
     print_greeting()
 
@@ -49,23 +71,11 @@ def main():
 
     websites = [Website(url=u[0], visit=u[1]) for u in sites]
 
-    counter = 1
-    max_count = 200
+    print(websites)
 
-    for website in websites:
-        if website.visit == "no":
-            mysoup = sp.parse_html(website.url)
-            links = sp.extract_links(mysoup)
+    main_loop(websites)
 
-            links2store = [_ for _ in links if _ not in stored_links["url"]]
 
-            store_links(links2store)
-
-            counter += 1
-
-            if counter > max_count:
-                break
-        print(stored_links)
 
 
 
