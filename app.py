@@ -30,8 +30,6 @@ def get_links():
     return my_dict
 
 def store_links(links):
-    file = os.path.abspath("url_list.csv")
-
 
     with open(r'url_list.csv', 'a', newline='') as csvfile:
         for link in links:
@@ -40,26 +38,50 @@ def store_links(links):
             writer.writerow({'url': link, 'visit': 'no'})
 
 
+
+
+def record_transaction(sites):
+    with open('url_list.csv', 'w') as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(["url", "visit"])
+        for row in sites:
+            writer.writerows([[row.url, row.visit]])
+
+
 def main_loop(websites):
     counter = 1
     max_count = 200
 
     stored_links = [site.url for site in websites]
 
+    parsed_sites = []
+    new_urls = []
+
     for website in websites:
+        print(website.visit)
         if website.visit == "no":
+            print("Hello There {}".format(website.visit))
             mysoup = sp.parse_html(website.url)
+            parsed_sites.append(website.url)
+
+            website._replace(visit = "yes")
+
             links = sp.extract_links(mysoup)
+            new_links = [_ for _ in links if _ not in stored_links]
 
-            links2store = [_ for _ in links if _ not in stored_links]
-
-            store_links(links2store)
+            new_urls = new_urls + new_links
 
             counter += 1
 
             if counter > max_count:
                 break
 
+
+    all_sites = parsed_sites + new_urls
+
+    new_sites = [Website(site, "yes" if site in parsed_sites else "no") for site in all_sites]
+
+    record_transaction(new_sites)
 
 
 def main():
@@ -71,13 +93,7 @@ def main():
 
     websites = [Website(url=u[0], visit=u[1]) for u in sites]
 
-    print(websites)
-
     main_loop(websites)
-
-
-
-
 
 
 
